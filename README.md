@@ -1,6 +1,6 @@
-# App
+# Record video in Angular11
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.1.4.
+In this project i used MediaDevices.getUserMedia() to record video in Angular projects
 
 ## Development server
 
