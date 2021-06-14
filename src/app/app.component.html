@@ -1,0 +1,11 @@
+<router-outlet></router-outlet>
+
+<div class="record-video-btn">
+  <button type="button" (click)="recordHandlre()" [style.background-color]="recordButtonColor">{{ videoButtonTitle
+    }}</button>
+</div>
+
+<div class="record-video-container">
+  <video [hidden]="!isCapturingVideo" id="preview" autoplay muted #preview muted="muted" class="video"></video>
+  <video [hidden]="isCapturingVideo" controls #recording class="video"></video>
+</div>
