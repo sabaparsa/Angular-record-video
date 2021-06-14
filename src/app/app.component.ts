@@ -19,7 +19,7 @@ export class AppComponent {
   }
   public isVideoTaken: boolean = false;
   public videoFile!: File;
-  public recordButtonColor: string = "blueviolet";
+  public recordButtonColor: string = "coral";
 
   constructor(
     private renderer: Renderer2,
@@ -36,7 +36,7 @@ export class AppComponent {
       this.startRecording();
 
     } else if (this.videoButtonTitle === "Stop Recording") {
-      this.recordButtonColor = "blueviolet";
+      this.recordButtonColor = "coral";
       this.stop(this.previewElement.nativeElement.srcObject);
     }
 
