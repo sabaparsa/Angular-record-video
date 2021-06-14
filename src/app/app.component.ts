@@ -85,6 +85,7 @@ export class AppComponent {
   }
 
   blobToFile = (theBlob: Blob, fileName: string): File => {
+    //create a file from blob
     var b: any = theBlob;
     b.lastModifiedDate = new Date();
     b.name = fileName;
