@@ -17,25 +17,129 @@ It returns a Promise that resolves to a MediaStream object. If the user denies p
   <video [hidden]="isCapturingVideo" controls #recording class="video"></video>
 </div>
 ```
-The first <video> is the preview of the recording video and the second one is used to show recorded video.
+
+The first video tag is the preview of the recording video and the second one is used to show recorded video.
+
+## Ts file
+```
+import { Component, ElementRef, Renderer2, ViewChild } from '@angular/core';
+declare var MediaRecorder: any;
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+
+export class AppComponent {
+  
+  @ViewChild('preview', {static: false}) public previewElement!: ElementRef;
+  @ViewChild('recording', {static: false}) public recordingElement!: ElementRef;
+  public videoButtonTitle: string = "Start Recording";
+  public isCapturingVideo: boolean = false;
+  public videoContraints = {
+    audio: true,
+    video: { facingMode: "user" }
+  }
+  public isVideoTaken: boolean = false;
+  public videoFile!: File;
+  public recordButtonColor: string = "blueviolet";
+
+  constructor(
+    private renderer: Renderer2,
+
+  ) { 
+     
+  }
+
+  recordHandlre(): void {
+
+    if (this.videoButtonTitle === "Start Recording" || this.videoButtonTitle === "Record Again") {
+      this.isCapturingVideo = true;
+      this.recordButtonColor = "red";
+      this.startRecording();
+
+    } else if (this.videoButtonTitle === "Stop Recording") {
+      this.recordButtonColor = "blueviolet";
+      this.stop(this.previewElement.nativeElement.srcObject);
+    }
+
+  }
+
+  startRecording(): void {
+    navigator.mediaDevices.getUserMedia(this.videoContraints).then((stream) => { this.bindStream(stream) })
+      .then(() => this.startRecordingVideo(this.previewElement.nativeElement.captureStream()))
+      .then((recordedChunks) => { this.recordChunks(recordedChunks) });
+  }
+
+  bindStream(stream: any) {
+    this.previewElement.nativeElement.muted = true;
+    this.renderer.setProperty(this.previewElement.nativeElement, 'srcObject', stream);
+    this.previewElement.nativeElement.captureStream =
+      this.previewElement.nativeElement.captureStream || this.previewElement.nativeElement.mozCaptureStream;
+    return new Promise((resolve) => (this.previewElement.nativeElement.onplaying = resolve));
+
+  }
+
+  startRecordingVideo(stream: any) {
+
+    this.videoButtonTitle = "Stop Recording";
+    let recorder = new MediaRecorder(stream);
+    let data: any = [];
+
+    recorder.ondataavailable = (event: any) => data.push(event.data);
+    recorder.start();
+
+    let stopped = new Promise((resolve, reject) => {
+      recorder.onstop = resolve;
+      recorder.onerror = (event: any) => reject(event);
+    });
+
+    let recorded =
+      () => recorder.state == "recording" && recorder.stop();
+
+    this.isVideoTaken = true;
+    return Promise.all([stopped, recorded]).then(() => data);
+  }
+
+  recordChunks(recordedChunks: any) {
+    let recordedBlob = new Blob(recordedChunks, { type: "video/webm" });
+    this.renderer.setProperty(this.recordingElement.nativeElement, 'src', URL.createObjectURL(recordedBlob));
+    this.videoFile = this.blobToFile(recordedBlob, "user-video.mp4");
+  }
+
+  blobToFile = (theBlob: Blob, fileName: string): File => {
+    //create a file
+    var b: any = theBlob;
+    b.lastModifiedDate = new Date();
+    b.name = fileName;
+
+    return <File>theBlob;
+  }
 
 
-## Code scaffolding
+  stop(stream: any) {
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+    stream.getTracks().forEach(function(track: any) {
+      track.stop();
+    });
+    this.videoButtonTitle = "Record Again";
+    this.isCapturingVideo = false;
+  }
+}
 
-## Build
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+## Convert blob to file 
+```
+  blobToFile = (theBlob: Blob, fileName: string): File => {
+    //create a file from blob
+    var b: any = theBlob;
+    b.lastModifiedDate = new Date();
+    b.name = fileName;
 
-## Running unit tests
+    return <File>theBlob;
+  }
+```
+In case you want to convert the recorded blob to file 
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
