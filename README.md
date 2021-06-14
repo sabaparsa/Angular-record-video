@@ -6,7 +6,7 @@ The MediaDevices.getUserMedia() method prompts the user for permission to use a 
 It returns a Promise that resolves to a MediaStream object. If the user denies permission, or matching media is not available, then the promise is rejected with NotAllowedError or NotFoundError respectively.
 
 ## HTML Template
-
+```
 <div class="record-video-btn">
   <button type="button" (click)="recordHandlre()" [style.background-color]="recordButtonColor">{{ videoButtonTitle
     }}</button>
@@ -16,8 +16,9 @@ It returns a Promise that resolves to a MediaStream object. If the user denies p
   <video [hidden]="!isCapturingVideo" id="preview" autoplay muted #preview muted="muted" class="video"></video>
   <video [hidden]="isCapturingVideo" controls #recording class="video"></video>
 </div>
+```
+The first <video> is the preview of the recording video and the second one is used to show recorded video.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 
